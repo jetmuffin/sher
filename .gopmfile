@@ -1,0 +1,7 @@
+[deps]
+github.com/Sirupsen/logrus = 
+github.com/mesos/mesos-go = 
+
+[res]
+include = 
+
