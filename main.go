@@ -30,7 +30,7 @@ func init() {
 func main() {
 
 	// Executor
-	executor := &mesos.ExecutorInfo{
+	exec := &mesos.ExecutorInfo{
 		ExecutorId: util.NewExecutorID("default"),
 		Name:       proto.String("Test Executor"),
 		Command: &mesos.CommandInfo{
@@ -39,8 +39,7 @@ func main() {
 	}
 
 	// Scheduler
-	newTestScheduler()
-	scheduler, err := newTestScheduler(executor, CPUS_PER_TASK, MEM_PER_TASK)
+	scheduler, err := NewTestScheduler(exec, CPUS_PER_TASK, MEM_PER_TASK)
 	if err != nil {
 		log.Fatalf("Failed to create scheduler with error: %v\n", err)
 		os.Exit(-2)
