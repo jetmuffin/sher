@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gogo/protobuf/proto"
 	"flag"
+	"time"
 	"os"
 
 	. "github.com/JetMuffin/sher/scheduler"
@@ -85,9 +86,23 @@ func prepareExecutorInfo(uri string) *mesos.ExecutorInfo {
 		Name:       proto.String("Test Executor (Go)"),
 		Source:     proto.String("go_test"),
 		Command: &mesos.CommandInfo{
-			Value: proto.String(uri),
+			Value: proto.String(getExecutorCmd(global.ExecutorPath)),
 			Uris:  executorUris,
 		},
 	}
+}
+
+func getExecutorCmd(path string) string {
+	// spilit base path from executorPath
+	// Example: ./exec
+	pathSplit := strings.Split(path, "/")
+	var base string
+	if len(pathSplit) > 0 {
+		base = pathSplit[len(pathSplit)-1]
+	} else {
+		base = path
+	}
+
+	return "./" + base
 }
 
