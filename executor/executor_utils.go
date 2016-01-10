@@ -14,7 +14,7 @@ import (
 )
 
 func downloadFile(url string) (string, error) {
-    downloadUrl := filepath.Join(global.Address, url)
+    downloadUrl := fmt.Sprintf("http://%s/%s", global.Address, url)
     tokens := strings.Split(url, "/")
     fileName := tokens[len(tokens)-1]
     fmt.Println("Downloading", downloadUrl, "to", fileName)

@@ -26,12 +26,14 @@ func init() {
 }
 
 func main() {
+
 	// Start HTTP server
+	log.Infof("HTTP Server run on :%v\n", global.Address)
 	server := NewHttpServer(global.Address, global.WorkDir)
 	server.Listen()
 
 	// Executor
-	executorUri := fmt.Sprintf("%s/%s", global.Address, global.ExecutorPath)
+	executorUri := fmt.Sprintf("http://%s/%s", global.Address, global.ExecutorPath)
 	exec := prepareExecutorInfo(executorUri)
 
 	// Scheduler
