@@ -4,25 +4,29 @@ import (
 	"fmt"
 	"os/exec"
     "strings"
+    "path/filepath"
     "net/http"
     "io"
     "os"
 	"io/ioutil"
+
+    global "github.com/JetMuffin/sher/global"
 )
 
 func downloadFile(url string) (string, error) {
+    downloadUrl := filepath.Join(global.Address, url)
     tokens := strings.Split(url, "/")
     fileName := tokens[len(tokens)-1]
-    fmt.Println("Downloading", url, "to", fileName)
+    fmt.Println("Downloading", downloadUrl, "to", fileName)
 
-    output, err := os.Create(fileName)
+    output, err := os.Create("/tmp/" + fileName)
     if err != nil {
         fmt.Println("Error while creating", fileName, "-", err)
         return "", err
     }
     defer output.Close()
 
-    response, err := http.Get(url)
+    response, err := http.Get(downloadUrl)
     if err != nil {
         fmt.Println("Error while downloading", url, "-", err)
         return "", err

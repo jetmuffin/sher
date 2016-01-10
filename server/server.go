@@ -94,3 +94,21 @@ func StartHttpServer(address string, filesToServe []HttpPathMapping) {
 	registerUploadHandler()
 	go http.ListenAndServe(address, nil)
 }
+
+// start 
+type HttpServer struct {
+	address string
+	workDir string
+}
+
+func NewHttpServer(address string, workDir string) *HttpServer {
+	return &HttpServer{
+		address: address,
+		workDir: workDir,
+	}
+}
+
+func (server *HttpServer) Listen() {
+	http.Handle("/", http.FileServer(http.Dir(server.workDir)))
+	go http.ListenAndServe(server.address, nil)
+}

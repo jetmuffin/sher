@@ -3,7 +3,6 @@ package scheduler
 import (
 	"github.com/gogo/protobuf/proto"
 	"strconv"
-	"fmt"
 
 	log "github.com/golang/glog"
 	mesos "github.com/mesos/mesos-go/mesosproto"
@@ -11,27 +10,25 @@ import (
 	sched "github.com/mesos/mesos-go/scheduler"
 )
 
-type TestScheduler struct {
+type MesosScheduler struct {
 	executor      *mesos.ExecutorInfo
 	tasksLaunched int
 	tasksFinished int
 	totalTasks    int
 	commands      []string
-	taskUri		  string
 	cpuPerTask    float64
 	memPerTask    float64
 }
 
-func NewTestScheduler(exec *mesos.ExecutorInfo, taskUri string, cpuPerTask float64, memPerTask float64) (*TestScheduler, error) {
+func NewMesosScheduler(exec *mesos.ExecutorInfo, cpuPerTask float64, memPerTask float64) (*MesosScheduler, error) {
 	commands, err := readLines("commands")
 	if err != nil {
 		log.Errorf("Error : %v\n", err)
 		return nil, err
 	}
 
-	return &TestScheduler{
+	return &MesosScheduler{
 		executor:      exec,
-		taskUri:	   taskUri,
 		tasksLaunched: 0,
 		tasksFinished: 0,
 		totalTasks:    len(commands),
@@ -41,19 +38,19 @@ func NewTestScheduler(exec *mesos.ExecutorInfo, taskUri string, cpuPerTask float
 	}, nil
 }
 
-func (sched *TestScheduler) Registered(driver sched.SchedulerDriver, frameworkId *mesos.FrameworkID, masterInfo *mesos.MasterInfo) {
+func (sched *MesosScheduler) Registered(driver sched.SchedulerDriver, frameworkId *mesos.FrameworkID, masterInfo *mesos.MasterInfo) {
 	log.Infoln("Scheduler Registered with Master ", masterInfo)
 }
 
-func (sched *TestScheduler) Reregistered(driver sched.SchedulerDriver, masterInfo *mesos.MasterInfo) {
+func (sched *MesosScheduler) Reregistered(driver sched.SchedulerDriver, masterInfo *mesos.MasterInfo) {
 	log.Infoln("Scheduler Re-Registered with Master ", masterInfo)
 }
 
-func (sched *TestScheduler) Disconnected(sched.SchedulerDriver) {
+func (sched *MesosScheduler) Disconnected(sched.SchedulerDriver) {
 	log.Infoln("Scheduler Disconnected")
 }
 
-func (sched *TestScheduler) processOffer(driver sched.SchedulerDriver, offer *mesos.Offer) {
+func (sched *MesosScheduler) processOffer(driver sched.SchedulerDriver, offer *mesos.Offer) {
 	remainingCpus := getOfferScalar(offer, "cpus")
 	remainingMems := getOfferScalar(offer, "mem")
 
@@ -87,7 +84,8 @@ func (sched *TestScheduler) processOffer(driver sched.SchedulerDriver, offer *me
 				util.NewScalarResource("cpus", sched.cpuPerTask),
 				util.NewScalarResource("mem", sched.memPerTask),
 			},
-			Data: []byte(fmt.Sprintf("%s/%s", sched.taskUri, commandFile)),
+			// TODO
+			Data: []byte(commandFile),
 		}
 		log.Infof("Prepared task: %s with offer %s for launch\n", task.GetName(), offer.Id.GetValue())
 
@@ -100,16 +98,18 @@ func (sched *TestScheduler) processOffer(driver sched.SchedulerDriver, offer *me
 	driver.LaunchTasks([]*mesos.OfferID{offer.Id}, tasks, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
 }
 
-func (sched *TestScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
+func (sched *MesosScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
 	for _, offer := range offers {
 		log.Infof("Received Offer <%v> with cpus=%v mem=%v", offer.Id.GetValue(), getOfferScalar(offer, "cpus"), getOfferScalar(offer, "mem"))
 		sched.processOffer(driver, offer)
 	}
 }
 
-func (sched *TestScheduler) StatusUpdate(driver sched.SchedulerDriver, status *mesos.TaskStatus) {
+func (sched *MesosScheduler) StatusUpdate(driver sched.SchedulerDriver, status *mesos.TaskStatus) {
 	log.Infoln("Status update: task", status.TaskId.GetValue(), " is in state ", status.State.Enum().String())
 
+	// TODO 
+	// extract function of taskManager
 	if status.GetState() == mesos.TaskState_TASK_FINISHED {
 		sched.tasksFinished++
 		log.Infof("%v of %v tasks finished.", sched.tasksFinished, sched.totalTasks)
@@ -132,22 +132,22 @@ func (sched *TestScheduler) StatusUpdate(driver sched.SchedulerDriver, status *m
 	}
 }
 
-func (sched *TestScheduler) OfferRescinded(s sched.SchedulerDriver, id *mesos.OfferID) {
+func (sched *MesosScheduler) OfferRescinded(s sched.SchedulerDriver, id *mesos.OfferID) {
 	log.Infof("Offer '%v' rescinded.\n", *id)
 }
 
-func (sched *TestScheduler) FrameworkMessage(s sched.SchedulerDriver, exId *mesos.ExecutorID, slvId *mesos.SlaveID, msg string) {
+func (sched *MesosScheduler) FrameworkMessage(s sched.SchedulerDriver, exId *mesos.ExecutorID, slvId *mesos.SlaveID, msg string) {
 	log.Infof("Received framework message from executor '%v' on slave '%v': %s.\n", *exId, *slvId, msg)
 }
 
-func (sched *TestScheduler) SlaveLost(s sched.SchedulerDriver, id *mesos.SlaveID) {
+func (sched *MesosScheduler) SlaveLost(s sched.SchedulerDriver, id *mesos.SlaveID) {
 	log.Infof("Slave '%v' lost.\n", *id)
 }
 
-func (sched *TestScheduler) ExecutorLost(s sched.SchedulerDriver, exId *mesos.ExecutorID, slvId *mesos.SlaveID, i int) {
+func (sched *MesosScheduler) ExecutorLost(s sched.SchedulerDriver, exId *mesos.ExecutorID, slvId *mesos.SlaveID, i int) {
 	log.Infof("Executor '%v' lost on slave '%v' with exit code: %v.\n", *exId, *slvId, i)
 }
 
-func (sched *TestScheduler) Error(driver sched.SchedulerDriver, err string) {
+func (sched *MesosScheduler) Error(driver sched.SchedulerDriver, err string) {
 	log.Infoln("Scheduler received error:", err)
 }
