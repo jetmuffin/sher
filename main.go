@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gogo/protobuf/proto"
+	"flag"
 	"os"
 
 	. "github.com/JetMuffin/sher/scheduler"
@@ -20,9 +21,11 @@ const (
 	defaultArtifactPort = 8000
 )
 
+func init() {
+	flag.Parse()
+}
+
 func main() {
-	fmt.Println(global.Master)
-	
 	// Start HTTP server
 	server := NewHttpServer(global.Address, global.WorkDir)
 	server.Listen()

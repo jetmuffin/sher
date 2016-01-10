@@ -18,6 +18,7 @@ var ExecutorPath	string 		// Path of executor binary file
 var WorkDir			string		// Path of workspace direction
 
 var once sync.Once
+
 // Read config file.
 func loadConfig(fileName string) error {
 
@@ -48,7 +49,7 @@ func loadConfig(fileName string) error {
         ip = "127.0.0.1"
     }
     port := configs.MustInt("", "port")
-    Address = fmt.Sprintf("%s/%d", ip, port)
+    Address = fmt.Sprintf("%s:%d", ip, port)
 
     // workdir
     WorkDir = configs.MustValue("", "workdir")
