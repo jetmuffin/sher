@@ -67,7 +67,7 @@ func (sched *MesosScheduler) processOffer(driver sched.SchedulerDriver, offer *m
 		sched.memPerTask <= remainingMems &&
 		sched.tasksLaunched < sched.totalTasks {
 
-		log.Infof("Processing command %v of %v\n", sched.tasksLaunched, sched.totalTasks)
+		log.Infof("Processing command %v of %v\n", sched.tasksLaunched+1, sched.totalTasks)
 		commandFile := sched.commands[sched.tasksLaunched]
 		sched.tasksLaunched++
 

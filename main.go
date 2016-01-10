@@ -28,7 +28,7 @@ func init() {
 func main() {
 
 	// Start HTTP server
-	log.Infof("HTTP Server run on :%v\n", global.Address)
+	fmt.Printf("HTTP Server run on %v\n", global.Address)
 	server := NewHttpServer(global.Address, global.WorkDir)
 	server.Listen()
 
@@ -67,6 +67,9 @@ func main() {
 		log.Fatalf("Framework stopped with status %s and error %s\n", stat.String(), err.Error())
 		os.Exit(-4)
 	}	
+	for {
+		time.Sleep(100 * time.Millisecond)
+	}
 }
 
 func prepareExecutorInfo(uri string) *mesos.ExecutorInfo {
