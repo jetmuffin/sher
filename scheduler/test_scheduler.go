@@ -3,6 +3,7 @@ package scheduler
 import (
 	"github.com/gogo/protobuf/proto"
 	"strconv"
+	"fmt"
 
 	log "github.com/golang/glog"
 	mesos "github.com/mesos/mesos-go/mesosproto"
@@ -16,11 +17,12 @@ type TestScheduler struct {
 	tasksFinished int
 	totalTasks    int
 	commands      []string
+	taskUri		  string
 	cpuPerTask    float64
 	memPerTask    float64
 }
 
-func NewTestScheduler(exec *mesos.ExecutorInfo, cpuPerTask float64, memPerTask float64) (*TestScheduler, error) {
+func NewTestScheduler(exec *mesos.ExecutorInfo, taskUri string, cpuPerTask float64, memPerTask float64) (*TestScheduler, error) {
 	commands, err := readLines("commands")
 	if err != nil {
 		log.Errorf("Error : %v\n", err)
@@ -29,6 +31,7 @@ func NewTestScheduler(exec *mesos.ExecutorInfo, cpuPerTask float64, memPerTask f
 
 	return &TestScheduler{
 		executor:      exec,
+		taskUri:	   taskUri,
 		tasksLaunched: 0,
 		tasksFinished: 0,
 		totalTasks:    len(commands),
@@ -68,7 +71,7 @@ func (sched *TestScheduler) processOffer(driver sched.SchedulerDriver, offer *me
 		sched.tasksLaunched < sched.totalTasks {
 
 		log.Infof("Processing command %v of %v\n", sched.tasksLaunched, sched.totalTasks)
-		command := sched.commands[sched.tasksLaunched]
+		commandFile := sched.commands[sched.tasksLaunched]
 		sched.tasksLaunched++
 
 		taskId := &mesos.TaskID{
@@ -84,7 +87,7 @@ func (sched *TestScheduler) processOffer(driver sched.SchedulerDriver, offer *me
 				util.NewScalarResource("cpus", sched.cpuPerTask),
 				util.NewScalarResource("mem", sched.memPerTask),
 			},
-			Data: []byte(command),
+			Data: []byte(fmt.Sprintf("%s/%s", sched.taskUri, commandFile)),
 		}
 		log.Infof("Prepared task: %s with offer %s for launch\n", task.GetName(), offer.Id.GetValue())
 

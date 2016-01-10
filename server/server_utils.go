@@ -6,7 +6,7 @@ import (
 	log "github.com/golang/glog"
 )
 
-func ServeExecutorArtifact(address string, port int, filePath string) string {
+func ServeFileArtifact(address string, port int, filePath string) string {
 	filesToServe := GetDefaultMappings([]string{filePath})
 
 	httpPath := filesToServe[0].HttpPath
@@ -18,3 +18,4 @@ func ServeExecutorArtifact(address string, port int, filePath string) string {
 	StartHttpServer(serverURI, filesToServe)
 	return hostURI
 }
+

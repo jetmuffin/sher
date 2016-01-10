@@ -6,7 +6,6 @@ import (
 
 	exec "github.com/mesos/mesos-go/executor"
 	mesos "github.com/mesos/mesos-go/mesosproto"
-	shell "os/exec"
 )
 
 type TestExecutor struct {
@@ -34,7 +33,7 @@ func (exec *TestExecutor) Disconnected(exec.ExecutorDriver) {
 func (exec *TestExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *mesos.TaskInfo) {
 	fmt.Printf("Launching task %v with data [%#x]\n", taskInfo.GetName(), taskInfo.Data)
 
-	// start task
+	// Start task
 	runStatus := &mesos.TaskStatus{
 		TaskId: taskInfo.GetTaskId(),
 		State:  mesos.TaskState_TASK_RUNNING.Enum(),
@@ -47,12 +46,20 @@ func (exec *TestExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *mesos
 	exec.tasksLaunched++
 	fmt.Println("Total tasks launched ", exec.tasksLaunched)
 
+	// Download command shell file
+	fileName, err := downloadFile(string(taskInfo.Data))
+	if err != nil {
+		fmt.Printf("Failed to download test script with error : %v\n", err)
+		return
+	}
+	fmt.Printf("Downloaded test shell file: %v\n", fileName)
+
 	// run command
-	cmd := shell.Command("/bin/sh", string(taskInfo.Data))
-	_, err = cmd.Output()
+	stdout, err := runCommand(fileName)
 	if err != nil {
 		fmt.Println("Command error :", err.Error())
 	}
+	fmt.Printf("Test result: %v\n", stdout)
 
 	// finish task
 	fmt.Println("Finishing task", taskInfo.GetName())
