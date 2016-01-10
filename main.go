@@ -69,9 +69,6 @@ func main() {
 		log.Fatalf("Framework stopped with status %s and error %s\n", stat.String(), err.Error())
 		os.Exit(-4)
 	}	
-	for {
-		time.Sleep(100 * time.Millisecond)
-	}
 }
 
 func prepareExecutorInfo(uri string) *mesos.ExecutorInfo {

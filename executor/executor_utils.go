@@ -13,7 +13,8 @@ import (
 )
 
 func downloadFile(url string) (string, error) {
-    downloadUrl := fmt.Sprintf("http://%s/%s", global.Address, url)
+    // TODO fix bug
+    downloadUrl := fmt.Sprintf("http://%s/%s", "192.168.33.10:8000", url)
     tokens := strings.Split(url, "/")
     fileName := tokens[len(tokens)-1]
     fmt.Println("Downloading", downloadUrl, "to", fileName)
