@@ -22,7 +22,8 @@ var once sync.Once
 // Read config file.
 func loadConfig(fileName string) error {
 
-    _, err := filepath.Abs(fileName)
+    configPath, err := filepath.Abs(fileName)
+    fmt.Println(configPath)
     if err != nil {
         return err
     }
