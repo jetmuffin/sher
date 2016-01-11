@@ -60,7 +60,9 @@ func (exec *MesosExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *meso
 		fmt.Println("Command error :", err.Error())
 	}
 	fmt.Printf("Running commands of %v\n", fileName)
-	writeFile(fileName, stdout)
+
+	// Save output
+	writeFile(fileName + "-result", stdout)
 
 	// Finish task
 	fmt.Println("Finishing task", taskInfo.GetName())

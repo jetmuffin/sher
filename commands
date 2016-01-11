@@ -1,3 +1,4 @@
 test/iostat.sh
 test/dir.sh
 test/broadcast.sh
+test/hello.sh
