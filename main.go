@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gogo/protobuf/proto"
 	"flag"
-	"time"
 	"strings"
 	"os"
 

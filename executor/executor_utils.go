@@ -8,8 +8,6 @@ import (
     "io"
     "os"
 	"io/ioutil"
-
-    global "github.com/JetMuffin/sher/global"
 )
 
 func downloadFile(url string) (string, error) {
@@ -44,8 +42,23 @@ func downloadFile(url string) (string, error) {
     return fileName, nil
 }
 
-func runCommand(url string) (string, error) {
-	cmd := exec.Command("/bin/bash", url)
+func readFile(fileName string) {
+    f, err := os.Open("/tmp/" + fileName)
+    if err != nil {
+        panic("open failed!")
+    }
+    defer f.Close()
+    buff := make([]byte, 1024)
+    for n, err := f.Read(buff); err == nil; n, err = f.Read(buff) {
+        fmt.Print(string(buff[:n]))
+    }
+    if err != nil {
+        panic(fmt.Sprintf("Read occurs error: %s", err))
+    }
+}
+
+func runCommand(fileName string) (string, error) {
+	cmd := exec.Command("/bin/bash", "/tmp/" + fileName)
 	stdout, err := cmd.StdoutPipe()
     if err != nil {
         return "", err

@@ -54,14 +54,17 @@ func (exec *TestExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *mesos
 	}
 	fmt.Printf("Downloaded test shell file: %v\n", fileName)
 
-	// run command
+	// Debug : read file
+	readFile(fileName)
+	
+	// Run command
 	stdout, err := runCommand(fileName)
 	if err != nil {
 		fmt.Println("Command error :", err.Error())
 	}
 	fmt.Printf("Test result: %v\n", stdout)
 
-	// finish task
+	// Finish task
 	fmt.Println("Finishing task", taskInfo.GetName())
 	finStatus := &mesos.TaskStatus{
 		TaskId: taskInfo.GetTaskId(),
