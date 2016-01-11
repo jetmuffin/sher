@@ -57,6 +57,16 @@ func readFile(fileName string) {
     }
 }
 
+func writeFile(fileName string, content string) {
+    f, err := os.Create(fileName)
+    defer f.Close()
+    if err != nil {
+        fmt.Println(fileName, err)
+        return
+    }
+    f.WriteString(content)
+}
+
 func runCommand(fileName string) (string, error) {
 	cmd := exec.Command("/bin/bash", "/tmp/" + fileName)
 	stdout, err := cmd.StdoutPipe()

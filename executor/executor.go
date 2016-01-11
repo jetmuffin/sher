@@ -8,29 +8,29 @@ import (
 	mesos "github.com/mesos/mesos-go/mesosproto"
 )
 
-type TestExecutor struct {
+type MesosExecutor struct {
 	tasksLaunched int
 }
 
-func newTestExecutor() *TestExecutor {
-	return &TestExecutor{
+func newMesosExecutor() *MesosExecutor {
+	return &MesosExecutor{
 		tasksLaunched: 0,
 	}
 }
 
-func (exec *TestExecutor) Registered(driver exec.ExecutorDriver, execInfo *mesos.ExecutorInfo, fwinfo *mesos.FrameworkInfo, slaveInfo *mesos.SlaveInfo) {
+func (exec *MesosExecutor) Registered(driver exec.ExecutorDriver, execInfo *mesos.ExecutorInfo, fwinfo *mesos.FrameworkInfo, slaveInfo *mesos.SlaveInfo) {
 	fmt.Println("Registered Executor on slave ", slaveInfo.GetHostname())
 }
 
-func (exec *TestExecutor) Reregistered(driver exec.ExecutorDriver, slaveInfo *mesos.SlaveInfo) {
+func (exec *MesosExecutor) Reregistered(driver exec.ExecutorDriver, slaveInfo *mesos.SlaveInfo) {
 	fmt.Println("Re-registered Executor on slave ", slaveInfo.GetHostname())
 }
 
-func (exec *TestExecutor) Disconnected(exec.ExecutorDriver) {
+func (exec *MesosExecutor) Disconnected(exec.ExecutorDriver) {
 	fmt.Println("Executor disconnected.")
 }
 
-func (exec *TestExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *mesos.TaskInfo) {
+func (exec *MesosExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *mesos.TaskInfo) {
 	fmt.Printf("Launching task %v with data [%#x]\n", taskInfo.GetName(), taskInfo.Data)
 
 	// Start task
@@ -54,15 +54,13 @@ func (exec *TestExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *mesos
 	}
 	fmt.Printf("Downloaded test shell file: %v\n", fileName)
 
-	// Debug : read file
-	readFile(fileName)
-	
 	// Run command
 	stdout, err := runCommand(fileName)
 	if err != nil {
 		fmt.Println("Command error :", err.Error())
 	}
-	fmt.Printf("Test result: %v\n", stdout)
+	fmt.Printf("Running commands of %v\n", fileName)
+	writeFile(fileName, stdout)
 
 	// Finish task
 	fmt.Println("Finishing task", taskInfo.GetName())
@@ -79,19 +77,19 @@ func (exec *TestExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *mesos
 	fmt.Println("Task finished", taskInfo.GetName())
 }
 
-func (exec *TestExecutor) KillTask(exec.ExecutorDriver, *mesos.TaskID) {
+func (exec *MesosExecutor) KillTask(exec.ExecutorDriver, *mesos.TaskID) {
 	fmt.Println("Kill task")
 }
 
-func (exec *TestExecutor) FrameworkMessage(driver exec.ExecutorDriver, msg string) {
+func (exec *MesosExecutor) FrameworkMessage(driver exec.ExecutorDriver, msg string) {
 	fmt.Println("Got framework message: ", msg)
 }
 
-func (exec *TestExecutor) Shutdown(exec.ExecutorDriver) {
+func (exec *MesosExecutor) Shutdown(exec.ExecutorDriver) {
 	fmt.Println("Shutting down the executor")
 }
 
-func (exec *TestExecutor) Error(driver exec.ExecutorDriver, err string) {
+func (exec *MesosExecutor) Error(driver exec.ExecutorDriver, err string) {
 	fmt.Println("Got error message:", err)
 }
 
@@ -103,7 +101,7 @@ func main() {
 	fmt.Println("Starting Test Executor")
 
 	driverConfig := exec.DriverConfig{
-		Executor: newTestExecutor(),
+		Executor: newMesosExecutor(),
 	}
 	driver, err := exec.NewMesosExecutorDriver(driverConfig)
 
