@@ -63,7 +63,7 @@ func (sched *MesosScheduler) processOffer(driver sched.SchedulerDriver, offer *m
 	// At this point we have determined we will be accepting at least part of this offer
 	var tasks []*mesos.TaskInfo
 
-	for sched.cpuPerTask <= remainingCpus &&
+	if sched.cpuPerTask <= remainingCpus &&
 		sched.memPerTask <= remainingMems &&
 		sched.tasksLaunched < sched.totalTasks {
 
